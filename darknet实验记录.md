@@ -1,5 +1,5 @@
-# 使用darknet训练YOLO实验记录
-
+# <div align='center'>使用darknet训练YOLO实验记录</div>
+#### <p align = "center">马玉峰📜</p>
 -------------
 2023.7.11更新
 ## 训练yolov3-tiny truck dataset
