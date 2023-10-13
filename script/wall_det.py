@@ -18,21 +18,21 @@ def parse_config():
     args = parser.parse_args()
     return args
 def read_pcd_file(file_path):
-    with open(file_path,'r') as file:
-        lines = file.readlines()
+    # with open(file_path,'r') as file:
+    #     lines = file.readlines()
 
-    data_start_line = 0
-    for i,line in enumerate(lines):
-        if line.startswith('DATA'):
-            data_start_line = i + 1
-            break
+    # data_start_line = 0
+    # for i,line in enumerate(lines):
+    #     if line.startswith('DATA'):
+    #         data_start_line = i + 1
+    #         break
 
-    point_cloud_data = []
-    for line in lines[data_start_line:]:
-        values = line.strip().split()
-        point_cloud_data.append(values)
-
-    point_cloud_array = np.array(point_cloud_data,dtype=np.float32)
+    # point_cloud_data = []
+    # for line in lines[data_start_line:]:
+    #     values = line.strip().split()
+    #     point_cloud_data.append(values)
+    pcd = o3d.io.read_point_cloud(file_path)
+    point_cloud_array = np.array(pcd.points,dtype=np.float32)
 
     return point_cloud_array
 
@@ -119,8 +119,8 @@ def wall_seg(sample_data,angular_res=0.18, height=0.3, delta_h=0.03):
         for point_indices, height_diff in group_diffs.items():
 
             if height_diff > delta_h : #此处为参数 delta_h
-    #             if distance_xoy(sample_data[i],sample_data[i+1]) < 0.5:
-    #                 p_wall.append(sample_data[point_indices])
+                if distance_xoy(sample_data[i],sample_data[i+1]) < 0.5:
+                    p_wall.append(sample_data[point_indices])
     
                 p_wall.append(sample_data[point_indices])
 
