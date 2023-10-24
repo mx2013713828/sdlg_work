@@ -7,11 +7,11 @@
 
 ## 第一，安装OpenPCDet
 
-- git clone
+- git clone OpenPCDet （可根据需求选择不同的分支版本）
 - 安装pytorch，1.10
 - 安装spconv （pip） 
     ```bash
-    pip install spconv-cu111
+    pip install spconv-cu111 #这会安装spconv2
     pip install -r requirements.txt
     python setup.py develop
     ```
