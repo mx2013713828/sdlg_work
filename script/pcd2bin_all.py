@@ -13,31 +13,10 @@ def parse_config():
     args = parser.parse_args()
     return args
 
-#read pcd file 
-def read_pcd_file(file_path):
-    with open(file_path,'r') as file:
-        lines = file.readlines()
-
-    data_start_line = 0
-    for i,line in enumerate(lines):
-        if line.startswith('DATA'):
-            data_start_line = i + 1
-            break
-
-    point_cloud_data = []
-    for line in lines[data_start_line:]:
-        values = line.strip().split()
-        point_cloud_data.append(values)
-
-    point_cloud_array = np.array(point_cloud_data,dtype=np.float32)
-
-    return point_cloud_array
-
 def read_pcd_file_bin(file_path):
     point_cloud_data = o3d.io.read_point_cloud(file_path)
     point_cloud_array = np.array(point_cloud_data.points)
     return point_cloud_array
-
 
 def save_bin_file(pcd_file_path,save_bin_path):
     if not os.path.exists(save_bin_path):
@@ -48,9 +27,13 @@ def save_bin_file(pcd_file_path,save_bin_path):
         for filename in files:          
             pcd_file = os.path.join(root,filename)
             point_cloud_array = read_pcd_file_bin(pcd_file)
+            if point_cloud_array.shape[1] == 3:
+                save_point = np.insert(point_cloud_array[:,:3],3,0,axis=1).astype(np.float32)
+                # save_points = np.insert(pt[:,:3],3,0,axis=1).astype(np.float32)
+
             bin_file_name = save_bin_path + filename.split('.')[0] + ".bin"
             print(bin_file_name)
-            point_cloud_array.tofile(bin_file_name)
+            save_point.tofile(bin_file_name)
 
 def main():
     args = parse_config()
