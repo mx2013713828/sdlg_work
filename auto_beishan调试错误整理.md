@@ -2,20 +2,21 @@
 ### <p align = "center">马玉峰📜</p>
 ----
 
-- [后雷达断开导致程序退出（未解决）](#后雷达断开导致程序退出未解决)
+- [后雷达断开导致程序退出（已解决）](#后雷达断开导致程序退出已解决)
 - [融合部分报错(未复现)](#融合部分报错)
 - [opencv-dnn导致冲突(未解决)](#opencv-dnn-错误)
 - [yolov8dnn导致冲突（已解决）](#yolov8dnn--点云推理-报错六小时以上会出现)
 - [禾赛sdk-多个主机IP相同导致退出](#禾赛sdk-多个主机间ip冲突影响雷达数据传输)
 - [禾赛sdk错误(已解决)](#禾赛sdk错误)
 - [yolov5lite与点云冲突(已解决)](#运行图像推理yolov5lite-与-点云推理-报错)
-- [多线程显存分配导致冲突(已解决)](#显存冲突)
+- [多显存显存分配导致冲突(已解决)](#错误显存内存(已解决))
 - [yolov3DNN与点云冲突(未解决)](#运行点云与yolov3_dnn-推理报错)
 - [单独运行yolov5lite导致退出(已解决)](#单独运行图像推理yolov5lite-报错)
+- [lidar_utility.h内存错误(已解决)](#lidar_utility-错误)
 
 ----
 
-## 后雷达断开导致程序退出（未解决）
+## 后雷达断开导致程序退出（已解决）
 ```bash
 (gdb) bt
 #0  0x0000aaaaaab59e94 in __gnu_cxx::new_allocator<PointXYZIRT>::construct<PointXYZIRT, PointXYZIRT&>(PointXYZIRT*, PointXYZIRT&)
@@ -218,7 +219,7 @@ _Index_tuple<0ul>) (this=0xaaaaaca72408) at /usr/include/c++/9/thread:244
 #18 0x0000ffffd7daf49c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone.S:78
 ```
 
-## 显存冲突
+## 错误（显存内存）
 
 ```bash
 #0  __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
@@ -302,7 +303,13 @@ PointPillar::doinfer (this=0xffffa6251e60, points_data=0x242e2b000, points_size=
 #2  0x0000fffff7ed9624 in start_thread (arg=0xaaaaaaade5a0 <task_cudaPointpillars(void*)>)
 --Type <RET> for more, q to quit, c to continue without paging--
     -----
+```
+
+- 解决方案：显存冲突，重写点云推理中的处理函数，部分操作转移到CPU上进行。
+
 ## yolov8dnn 报错
+
+```bash
     __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
 50      ../sysdeps/unix/sysv/linux/raise.c: No such file or directory.
 (gdb) bt
@@ -335,6 +342,7 @@ t&, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::al
 --Type <RET> for more, q to quit, c to continue without paging--
 ```
 
+- 问题分析：本质还是opencv的bug，opencv的dnn模块在arm64架构下，没有适配好，导致dnn模块的调用出错，从而导致程序崩溃。
 
 ## 运行图像推理yolov5lite 与 点云推理 报错
 ```bash
@@ -383,3 +391,62 @@ __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
     at pthread_create.c:477
 #12 0x0000ffffd7cf049c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone.S:78
 ```
+
+## lidar_utility 错误
+
+```shell
+malloc(): invalid size (unsorted)
+--Type <RET> for more, q to quit, c to continue without paging--bt
+
+Thread 38 "sdlg" received signal SIGABRT, Aborted.
+[Switching to Thread 0xfffefc9e3900 (LWP 28660)]
+__GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
+50      ../sysdeps/unix/sysv/linux/raise.c: No such file or directory.
+(gdb) bt
+#0  __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
+#1  0x0000ffffe6fc3aac in __GI_abort () at abort.c:79
+#2  0x0000ffffe7010f40 in __libc_message (action=action@entry=do_abort, fmt=fmt@entry=0xffffe70d2518 "%s\n") at ../sysdeps/posix/libc_fatal.c:155
+#3  0x0000ffffe7018344 in malloc_printerr (str=str@entry=0xffffe70ce4b0 "malloc(): invalid size (unsorted)") at malloc.c:5347
+#4  0x0000ffffe701aedc in _int_malloc (av=av@entry=0xfffec4000020, bytes=bytes@entry=1978368) at malloc.c:3736
+#5  0x0000ffffe701c574 in __GI___libc_malloc (bytes=1978368) at malloc.c:3066
+#6  0x0000aaaaaabc4f78 in Eigen::internal::aligned_malloc(unsigned long) (size=1978368) at /usr/include/eigen3/Eigen/src/Core/util/Memory.h:159
+#7  0x0000aaaaaac479b4 in Eigen::aligned_allocator<PointXYZIRT>::allocate(unsigned long, void const*) (this=0xfffefc9e2b88, num=41216)
+    at /usr/include/eigen3/Eigen/src/Core/util/Memory.h:758
+#8  0x0000aaaaaac42918 in std::allocator_traits<Eigen::aligned_allocator<PointXYZIRT> >::allocate(Eigen::aligned_allocator<PointXYZIRT>&, unsigned long)
+    (__a=..., __n=41216) at /usr/include/c++/9/bits/alloc_traits.h:305
+#9  0x0000aaaaaac3c340 in std::_Vector_base<PointXYZIRT, Eigen::aligned_allocator<PointXYZIRT> >::_M_allocate(unsigned long)
+    (this=0xfffefc9e2b88, __n=41216) at /usr/include/c++/9/bits/stl_vector.h:343
+#10 0x0000aaaaaacb25cc in std::vector<PointXYZIRT, Eigen::aligned_allocator<PointXYZIRT> >::_M_allocate_and_copy<__gnu_cxx::__normal_iterator<PointXYZIRT const*, std::vector<PointXYZIRT, Eigen::aligned_allocator<PointXYZIRT> > > >(unsigned long, __gnu_cxx::__normal_iterator<PointXYZIRT const*, std::vector<PointXYZIRT, Eigen::aligned_allocator<PointXYZIRT> > >, __gnu_cxx::__normal_iterator<PointXYZIRT const*, std::vector<PointXYZIRT, Eigen::aligned_allocator<PointXYZIRT> > >) (this=0xfffefc9e2b88, __n=41216, __first=
+  {{data = {0.207211211, 0.0746006295, 0.0590107441, 0}, {x = 0.207211211, y = 0.0746006295, z = 0.0590107441}}, intensity = 0, timestamp = 1589940661.5196209, ring = 0}, __last=
+  {{data = {-0.688301563, 0.384048343, 0.211196348, 0}, {x = -0.688301563, y = 0.384048343, z = 0.211196348}}, intensity = 8, timestamp = 1589940661.5832181, ring = 0}) at /usr/include/c++/9/bits/stl_vector.h:1508
+#11 0x0000aaaaaacaee30 in std::vector<PointXYZIRT, Eigen::aligned_allocator<PointXYZIRT> >::operator=(std::vector<PointXYZIRT, Eigen::aligned_allocator<PointXYZIRT> > const&) (this=0xfffefc9e2b88, __x=std::vector of length 41216, capacity 41216 = {...}) at /usr/include/c++/9/bits/vector.tcc:226
+#12 0x0000aaaaaacaaa64 in pcl::PointCloud<PointXYZIRT>::operator=(pcl::PointCloud<PointXYZIRT> const&) (this=0xfffefc9e2b50)
+    at /usr/local/include/pcl-1.8/pcl/point_cloud.h:172
+#13 0x0000aaaaaaebc678 in transformPointCloud_pose(boost::shared_ptr<pcl::PointCloud<PointXYZIRT> > const&, pose_t, bool)
+    (inputCloud=..., pose=..., apply_sparse=false) at sources/lidars/jetpack50/../lidar_utility.h:59
+#14 0x0000aaaaaaebc830 in mergePointClouds(boost::shared_ptr<pcl::PointCloud<PointXYZIRT> > const&, boost::shared_ptr<pcl::PointCloud<PointXYZIRT> > const&--Type <RET> for more, q to quit, c to continue without paging--
+, boost::shared_ptr<pcl::PointCloud<PointXYZIRT> > const&, pose_t, pose_t, pose_t, bool)
+    (mainCloud=..., leftCloud=..., rightCloud=..., pose_left=..., pose_right=..., pose_car=..., apply_sparse=false)
+    at sources/lidars/jetpack50/../lidar_utility.h:89
+#15 0x0000aaaaaaebe374 in CudaPointpillars::task() (this=0xfffffff9f7e0) at sources/lidars/jetpack50/cuda_pointpillars.cpp:145
+#16 0x0000aaaaaaec1ab0 in std::__invoke_impl<void, void (CudaPointpillars::*&)(), CudaPointpillars*&>(std::__invoke_memfun_deref, void (CudaPointpillars::*&)(), CudaPointpillars*&)
+    (__f=@0xaaaaabdfac28: (void (CudaPointpillars::*)(class CudaPointpillars * const)) 0xaaaaaaebe208 <CudaPointpillars::task()>, __t=@0xaaaaabdfac38: 0xfffffff9f7e0) at /usr/include/c++/9/bits/invoke.h:73
+#17 0x0000aaaaaaec19e4 in std::__invoke<void (CudaPointpillars::*&)(), CudaPointpillars*&>(void (CudaPointpillars::*&)(), CudaPointpillars*&)
+    (__fn=@0xaaaaabdfac28: (void (CudaPointpillars::*)(class CudaPointpillars * const)) 0xaaaaaaebe208 <CudaPointpillars::task()>)
+    at /usr/include/c++/9/bits/invoke.h:95
+#18 0x0000aaaaaaec193c in std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()>::__call<void, , 0ul>(std::tuple<>&&, std::_Index_tuple<0ul>)
+    (this=0xaaaaabdfac28, __args=...) at /usr/include/c++/9/functional:400
+#19 0x0000aaaaaaec18b8 in std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()>::operator()<, void>() (this=0xaaaaabdfac28)
+    at /usr/include/c++/9/functional:484
+#20 0x0000aaaaaaec1854 in std::__invoke_impl<void, std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()>>(std::__invoke_other, std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()>&&) (__f=...) at /usr/include/c++/9/bits/invoke.h:60
+#21 0x0000aaaaaaec17f8 in std::__invoke<std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()>>(std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()>&&) (__fn=...) at /usr/include/c++/9/bits/invoke.h:95
+#22 0x0000aaaaaaec1794 in std::thread::_Invoker<std::tuple<std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()> > >::_M_invoke<0ul>(std::_Index_tuple<0ul>) (this=0xaaaaabdfac28) at /usr/include/c++/9/thread:244
+#23 0x0000aaaaaaec176c in std::thread::_Invoker<std::tuple<std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()> > >::operator()()
+    (this=0xaaaaabdfac28) at /usr/include/c++/9/thread:251
+#24 0x0000aaaaaaec174c in std::thread::_State_impl<std::thread::_Invoker<std::tuple<std::_Bind<void (CudaPointpillars::*(CudaPointpillars*))()> > > >::_M_run() (this=0xaaaaabdfac20) at /usr/include/c++/9/thread:195
+#25 0x0000ffffe72b1f9c in  () at /lib/aarch64-linux-gnu/libstdc++.so.6
+#26 0x0000fffff7e93624 in start_thread (arg=0xffffe72b1f80) at pthread_create.c:477
+#27 0x0000ffffe707449c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone.S:78
+```
+
+- 解决方法：使用pcl::copyPointCloud 替换 '='运算符进行赋值操作。
