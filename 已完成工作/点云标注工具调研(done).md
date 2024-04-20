@@ -17,7 +17,7 @@
 
 [labelcloud](https://github.com/ch-sa/labelCloud.git)类似于labelimg，是最早一批的开源点云标注工具。
 
-![labelcloud](./images/labelcloud01.gif)
+![labelcloud](../images/labelcloud01.gif)
 
 优点：
 
@@ -34,7 +34,7 @@
 
 [PCAT](https://github.com/Qjizhi/point_cloud_ros_annotation_tool) 是个人开发的项目，基于ROS，可以同时显示图片与点云，方便标注。
 
-![pcat](./images/pcat01.png)
+![pcat](../images/pcat01.png)
 
 优点：
 
@@ -65,7 +65,7 @@
 
 [supervisely](https://supervisely.com/)是国外的一款在线数据管理平台，包含数据采集、标注、训练的全流程。
 
-![supervisely](./images/supervisely.png)
+![supervisely](../images/supervisely.png)
 
 优点：
 - 三维视图标注，标注结果清晰可见
