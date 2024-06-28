@@ -32,3 +32,22 @@ corrupted double-linked list
 - 测试4：训练使用7类，构建数据集8类
 
 可以导出
+
+### 错误原因
+
+```python
+# simplify_onnx.py 
+def simplify_postprocess(onnx_model, FEATURE_SIZE_X, FEATURE_SIZE_Y, NUMBER_OF_CLASSES):
+  print("Use onnx_graphsurgeon to adjust postprocessing part in the onnx...")
+  graph = gs.import_onnx(onnx_model)
+
+  cls_preds = gs.Variable(name="cls_preds", dtype=np.float32, shape=(1, int(FEATURE_SIZE_Y), int(FEATURE_SIZE_X), 2*NUMBER_OF_CLASSES*NUMBER_OF_CLASSES))
+  box_preds = gs.Variable(name="box_preds", dtype=np.float32, shape=(1, int(FEATURE_SIZE_Y), int(FEATURE_SIZE_X), 14*NUMBER_OF_CLASSES))
+  dir_cls_preds = gs.Variable(name="dir_cls_preds", dtype=np.float32, shape=(1, int(FEATURE_SIZE_Y), int(FEATURE_SIZE_X), 4*NUMBER_OF_CLASSES))
+
+```
+
+上述代码中的cls_preds、box_preds、dir_cls_preds的形状需和训练时保持一致。
+训练时，参数文件中的参考anchor数 * 2 = anchors 
+之所以此处使用2 * NUMBER_OF_CLASSES * NUMBER_OF_CLASSES，是因为训练时对于每一类都设置一个anchor。
+报错就是因为训练时没有对每一类设置一个参考anchor。
