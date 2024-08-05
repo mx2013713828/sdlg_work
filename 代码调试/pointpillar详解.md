@@ -2,7 +2,7 @@
 
 ### 整体工作流
 
-!["as"](./images/others/pointpillar_note_1.jpg)
+!["as"](../images/others/pointpillar_note_1.jpg)
 
 ### 转化onnx模型流程
 
